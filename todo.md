@@ -53,3 +53,8 @@
 - [x] Create user documentation
 - [x] Deploy application
 
+
+
+## Bugs
+- [x] Fix tRPC "Unexpected token '<'" error - client receiving HTML instead of JSON (Fixed: Vite middleware was intercepting API routes)
+
