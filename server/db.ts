@@ -21,6 +21,8 @@ import {
   InsertUploadQueueItem,
   revenue,
   InsertRevenue,
+  importJobs,
+  InsertImportJob,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -486,5 +488,65 @@ export async function getTotalRevenue(userId: number, filters?: { platformId?: n
   
   const result = await db.select({ total: sql<number>`sum(${revenue.amount})` }).from(revenue).where(and(...conditions));
   return result[0]?.total || 0;
+}
+
+
+// ============= Import Jobs =============
+
+export async function createImportJob(job: InsertImportJob) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(importJobs).values(job);
+  return result;
+}
+
+export async function getImportJobsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(importJobs).where(eq(importJobs.userId, userId)).orderBy(desc(importJobs.createdAt));
+}
+
+export async function getImportJobById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(importJobs).where(eq(importJobs.id, id)).limit(1);
+  return result[0];
+}
+
+export async function updateImportJob(id: number, updates: Partial<InsertImportJob>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(importJobs).set(updates).where(eq(importJobs.id, id));
+}
+
+export async function getPendingImportJobs() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(importJobs).where(eq(importJobs.status, "pending")).orderBy(importJobs.createdAt);
+}
+
+export async function getScheduledImportJobs() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const now = new Date();
+  return await db.select().from(importJobs)
+    .where(and(
+      eq(importJobs.isRecurring, true),
+      sql`${importJobs.nextRunAt} <= ${now}`
+    ))
+    .orderBy(importJobs.nextRunAt);
+}
+
+export async function deleteImportJob(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(importJobs).where(eq(importJobs.id, id));
 }
 

@@ -501,6 +501,122 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+
+  // ============= Import Jobs =============
+  importJobs: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getImportJobsByUserId(ctx.user.id);
+    }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const job = await db.getImportJobById(input.id);
+        if (!job || job.userId !== ctx.user.id) {
+          throw new Error("Import job not found or unauthorized");
+        }
+        return job;
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string(),
+        galleryId: z.number().optional(),
+        sourceType: z.enum(["google_drive", "url", "local_folder"]),
+        sourcePath: z.string(),
+        filters: z.object({
+          dateFrom: z.date().optional(),
+          dateTo: z.date().optional(),
+          minSize: z.number().optional(),
+          maxSize: z.number().optional(),
+          fileTypes: z.array(z.string()).optional(),
+        }).optional(),
+        autoCategories: z.array(z.number()).optional(),
+        autoTags: z.array(z.number()).optional(),
+        isRecurring: z.boolean().default(false),
+        schedule: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.createImportJob({
+          userId: ctx.user.id,
+          name: input.name,
+          galleryId: input.galleryId,
+          sourceType: input.sourceType,
+          sourcePath: input.sourcePath,
+          filters: input.filters ? JSON.stringify(input.filters) : null,
+          autoCategories: input.autoCategories ? JSON.stringify(input.autoCategories) : null,
+          autoTags: input.autoTags ? JSON.stringify(input.autoTags) : null,
+          isRecurring: input.isRecurring,
+          schedule: input.schedule,
+          status: "pending",
+        });
+        return { success: true };
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        status: z.enum(["pending", "running", "completed", "failed", "paused"]).optional(),
+        filters: z.object({
+          dateFrom: z.date().optional(),
+          dateTo: z.date().optional(),
+          minSize: z.number().optional(),
+          maxSize: z.number().optional(),
+          fileTypes: z.array(z.string()).optional(),
+        }).optional(),
+        autoCategories: z.array(z.number()).optional(),
+        autoTags: z.array(z.number()).optional(),
+        isRecurring: z.boolean().optional(),
+        schedule: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const job = await db.getImportJobById(input.id);
+        if (!job || job.userId !== ctx.user.id) {
+          throw new Error("Import job not found or unauthorized");
+        }
+
+        const updates: any = {};
+        if (input.name) updates.name = input.name;
+        if (input.status) updates.status = input.status;
+        if (input.filters) updates.filters = JSON.stringify(input.filters);
+        if (input.autoCategories) updates.autoCategories = JSON.stringify(input.autoCategories);
+        if (input.autoTags) updates.autoTags = JSON.stringify(input.autoTags);
+        if (input.isRecurring !== undefined) updates.isRecurring = input.isRecurring;
+        if (input.schedule) updates.schedule = input.schedule;
+
+        await db.updateImportJob(input.id, updates);
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const job = await db.getImportJobById(input.id);
+        if (!job || job.userId !== ctx.user.id) {
+          throw new Error("Import job not found or unauthorized");
+        }
+        await db.deleteImportJob(input.id);
+        return { success: true };
+      }),
+
+    start: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const job = await db.getImportJobById(input.id);
+        if (!job || job.userId !== ctx.user.id) {
+          throw new Error("Import job not found or unauthorized");
+        }
+        
+        // Update status to running
+        await db.updateImportJob(input.id, { status: "running", lastRunAt: new Date() });
+        
+        // TODO: Trigger background job processor
+        // This would be handled by a separate worker process
+        
+        return { success: true, message: "Import job started" };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

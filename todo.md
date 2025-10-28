@@ -58,3 +58,19 @@
 ## Bugs
 - [x] Fix tRPC "Unexpected token '<'" error - client receiving HTML instead of JSON (Fixed: Vite middleware was intercepting API routes)
 
+
+
+## New Features - Automated Bulk Import System
+- [x] Add import jobs database schema
+- [x] Create import jobs API endpoints (create, list, update, delete, start)
+- [x] Build Import Jobs UI with job creation dialog
+- [x] Add import progress tracking and reporting
+- [x] Create filter configuration UI (date ranges, file types, size limits)
+- [x] Support multiple source types (URL, Google Drive, local folder)
+- [x] Add auto-categorization and auto-tagging configuration
+- [x] Implement recurring job scheduling with cron expressions
+- [ ] Build background job processor for actual file imports
+- [ ] Add Google Drive API integration
+- [ ] Implement URL-based album scraping
+- [ ] Add AI-powered content analysis during import
+

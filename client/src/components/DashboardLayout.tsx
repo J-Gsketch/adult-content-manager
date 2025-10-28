@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Images, FolderTree, Tags, Upload, DollarSign, Settings } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Images, FolderTree, Tags, Upload, DollarSign, Settings, Download } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -29,7 +29,8 @@ import { Button } from "./ui/button";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-  { icon: Images, label: "Media Library", path: "/media" },
+  { icon: Images, label: "Media Library", path: "/media-library" },
+  { icon: Download, label: "Import Jobs", path: "/import-jobs" },
   { icon: FolderTree, label: "Categories", path: "/categories" },
   { icon: Tags, label: "Tags", path: "/tags" },
   { icon: Upload, label: "Upload Queue", path: "/upload-queue" },

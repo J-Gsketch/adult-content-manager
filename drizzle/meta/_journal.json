@@ -15,6 +15,13 @@
       "when": 1761536320916,
       "tag": "0001_worried_lyja",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1761610048521,
+      "tag": "0002_messy_jackal",
+      "breakpoints": true
     }
   ]
 }

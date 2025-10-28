@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import ImportJobs from "./pages/ImportJobs";
 import MediaLibrary from "./pages/MediaLibrary";
 import Settings from "./pages/Settings";
 import UploadQueue from "./pages/UploadQueue";
@@ -15,7 +16,8 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-      <Route path={"/media"} component={MediaLibrary} />
+      <Route path={"/import-jobs"} component={ImportJobs} />
+      <Route path={"/media-library"} component={MediaLibrary} />
       <Route path={"/upload-queue"} component={UploadQueue} />
       <Route path={"/revenue"} component={Revenue} />
       <Route path={"/settings"} component={Settings} />

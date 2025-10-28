@@ -39,6 +39,48 @@ export type Gallery = typeof galleries.$inferSelect;
 export type InsertGallery = typeof galleries.$inferInsert;
 
 /**
+ * Automated import jobs for bulk content processing
+ */
+export const importJobs = mysqlTable("import_jobs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  galleryId: int("galleryId"),
+  name: varchar("name", { length: 255 }).notNull(),
+  sourceType: mysqlEnum("sourceType", ["google_drive", "url", "local_folder"]).notNull(),
+  sourcePath: text("sourcePath").notNull(), // Folder path, URL, or Drive folder ID
+  status: mysqlEnum("status", ["pending", "running", "completed", "failed", "paused"]).default("pending").notNull(),
+  
+  // Import rules/filters
+  filters: text("filters"), // JSON: {dateFrom, dateTo, minSize, maxSize, fileTypes}
+  autoCategories: text("autoCategories"), // JSON: array of category IDs to auto-assign
+  autoTags: text("autoTags"), // JSON: array of tags to auto-assign
+  
+  // Progress tracking
+  totalItems: int("totalItems").default(0),
+  processedItems: int("processedItems").default(0),
+  successfulItems: int("successfulItems").default(0),
+  failedItems: int("failedItems").default(0),
+  duplicateItems: int("duplicateItems").default(0),
+  
+  // Scheduling
+  isRecurring: boolean("isRecurring").default(false),
+  schedule: varchar("schedule", { length: 100 }), // Cron expression for recurring jobs
+  lastRunAt: timestamp("lastRunAt"),
+  nextRunAt: timestamp("nextRunAt"),
+  
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  completedAt: timestamp("completedAt"),
+}, (table) => ({
+  userIdIdx: index("userId_idx").on(table.userId),
+  statusIdx: index("status_idx").on(table.status),
+}));
+
+export type ImportJob = typeof importJobs.$inferSelect;
+export type InsertImportJob = typeof importJobs.$inferInsert;
+
+/**
  * Media items (photos/videos) imported from galleries
  */
 export const mediaItems = mysqlTable("media_items", {
