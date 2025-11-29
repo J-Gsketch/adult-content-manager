@@ -159,6 +159,13 @@ export default function ImportJobs() {
                     {sourceType === "local_folder" && "Enter the full path to the local folder"}
                   </p>
                 </div>
+                
+                <div className="bg-muted/50 p-4 rounded-lg border border-border">
+                  <p className="text-sm font-medium mb-1">✨ Fully Automated Processing</p>
+                  <p className="text-xs text-muted-foreground">
+                    AI will automatically analyze, categorize, and tag all imported content. No manual selection needed!
+                  </p>
+                </div>
               </div>
               
               <DialogFooter>

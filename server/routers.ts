@@ -6,6 +6,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { storagePut } from "./storage";
 import { invokeLLM } from "./_core/llm";
+import { analyzeAdultContent } from "./contentAnalyzer";
 import crypto from "crypto";
 
 export const appRouter = router({
@@ -129,8 +130,8 @@ export const appRouter = router({
         // Upload to S3
         const { url: storageUrl } = await storagePut(fileKey, buffer, input.mimeType);
         
-        // Create media item
-        await db.createMediaItem({
+        // Create media item with pending analysis
+        const result = await db.createMediaItem({
           userId: ctx.user.id,
           galleryId: input.galleryId,
           storageKey: fileKey,
@@ -142,7 +143,49 @@ export const appRouter = router({
           aiAnalysisStatus: "pending",
         });
         
-        return { success: true, url: storageUrl };
+        const mediaId = Number(result[0].insertId);
+        
+        // Automatically analyze content with AI (async, don't wait)
+        analyzeAdultContent(storageUrl)
+          .then(async (analysis) => {
+            // Update media item with analysis results
+            await db.updateMediaItem(mediaId, {
+              isExplicit: analysis.isExplicit,
+              nsfwScore: analysis.explicitLevel,
+              aiAnalysisResult: JSON.stringify(analysis),
+              aiAnalysisStatus: "completed",
+            });
+            
+            // Auto-create and assign categories
+            for (const categoryName of analysis.categories) {
+              // Check if category exists
+              const categories = await db.getCategoriesByUserId(ctx.user.id);
+              let category = categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
+              
+              // Create if doesn't exist
+              if (!category) {
+                await db.createCategory({ userId: ctx.user.id, name: categoryName });
+                const updated = await db.getCategoriesByUserId(ctx.user.id);
+                category = updated.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
+              }
+              
+              if (category) {
+                await db.addMediaToCategory(mediaId, category.id).catch(() => {});
+              }
+            }
+            
+            // Auto-create and assign tags
+            for (const tagName of analysis.tags) {
+              const tag = await db.getOrCreateTag(ctx.user.id, tagName, "ai_generated");
+              await db.addTagToMedia(mediaId, tag.id).catch(() => {});
+            }
+          })
+          .catch((error) => {
+            console.error("Auto-analysis failed for media", mediaId, error);
+            db.updateMediaItem(mediaId, { aiAnalysisStatus: "failed" });
+          });
+        
+        return { success: true, url: storageUrl, mediaId };
       }),
 
     update: protectedProcedure
@@ -315,6 +358,22 @@ export const appRouter = router({
     list: protectedProcedure.query(async ({ ctx }) => {
       return await db.getTagsByUserId(ctx.user.id);
     }),
+
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const tag = await db.getOrCreateTag(ctx.user.id, input.name, "manual");
+        return { success: true, tag };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteTag(input.id);
+        return { success: true };
+      }),
 
     addToMedia: protectedProcedure
       .input(z.object({

@@ -6,6 +6,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import ImportJobs from "./pages/ImportJobs";
+import Categories from "./pages/Categories";
+import Tags from "./pages/Tags";
 import MediaLibrary from "./pages/MediaLibrary";
 import Settings from "./pages/Settings";
 import UploadQueue from "./pages/UploadQueue";
@@ -17,6 +19,8 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/import-jobs"} component={ImportJobs} />
+      <Route path={"/categories"} component={Categories} />
+      <Route path={"/tags"} component={Tags} />
       <Route path={"/media-library"} component={MediaLibrary} />
       <Route path={"/upload-queue"} component={UploadQueue} />
       <Route path={"/revenue"} component={Revenue} />

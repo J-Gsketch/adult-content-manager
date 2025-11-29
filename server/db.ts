@@ -304,6 +304,16 @@ export async function getOrCreateTag(userId: number, name: string, type: "manual
   return newTag[0];
 }
 
+export async function deleteTag(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // First delete all media-tag relationships
+  await db.delete(mediaTags).where(eq(mediaTags.tagId, id));
+  // Then delete the tag
+  return await db.delete(tags).where(eq(tags.id, id));
+}
+
 export async function incrementTagUsage(tagId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
