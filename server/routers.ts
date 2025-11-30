@@ -7,6 +7,8 @@ import * as db from "./db";
 import { storagePut } from "./storage";
 import { invokeLLM } from "./_core/llm";
 import { analyzeAdultContent } from "./contentAnalyzer";
+import { startImportJob, stopImportJob } from "./importProcessor";
+import { getPlatformAdapter, listAvailablePlatforms } from "./platformAdapters";
 import crypto from "crypto";
 
 export const appRouter = router({
@@ -203,6 +205,17 @@ export const appRouter = router({
         
         const { id, ...updates } = input;
         await db.updateMediaItem(id, updates);
+        return { success: true };
+      }),
+
+    approve: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const item = await db.getMediaItemById(input.id);
+        if (!item || item.userId !== ctx.user.id) {
+          throw new Error("Media item not found or unauthorized");
+        }
+        await db.updateMediaItem(input.id, { isApproved: true });
         return { success: true };
       }),
 
@@ -457,6 +470,21 @@ export const appRouter = router({
         await db.deletePlatform(input.id);
         return { success: true };
       }),
+
+    listAvailable: publicProcedure.query(() => {
+      return listAvailablePlatforms();
+    }),
+
+    testConnection: protectedProcedure
+      .input(z.object({
+        platformType: z.string(),
+        credentials: z.record(z.string(), z.any()),
+      }))
+      .mutation(async ({ input }) => {
+        const adapter = getPlatformAdapter(input.platformType);
+        const isValid = await adapter.validateCredentials(input.credentials);
+        return { success: isValid, message: isValid ? "Connection successful" : "Invalid credentials" };
+      }),
   }),
 
   // ============= Upload Queue Management =============
@@ -516,6 +544,67 @@ export const appRouter = router({
         }
         await db.deleteUploadQueueItem(input.id);
         return { success: true };
+      }),
+
+    processUpload: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const item = await db.getUploadQueueItemById(input.id);
+        if (!item || item.userId !== ctx.user.id) {
+          throw new Error("Upload queue item not found or unauthorized");
+        }
+
+        // Get media item and platform
+        const media = await db.getMediaItemById(item.mediaItemId);
+        const platform = await db.getPlatformById(item.platformId);
+
+        if (!media || !platform) {
+          throw new Error("Media or platform not found");
+        }
+
+        // Update status to processing
+        await db.updateUploadQueueItem(input.id, { status: "processing" });
+
+        try {
+          // Get platform adapter
+          const adapter = getPlatformAdapter(platform.type);
+
+          // Parse credentials
+          const credentials = platform.credentials ? JSON.parse(platform.credentials) : {};
+
+          // Prepare metadata
+          const metadata = {
+            title: item.title || media.filename,
+            description: item.description || "",
+            tags: [], // Could extract from media tags
+            ...(item.customMetadata ? JSON.parse(item.customMetadata) : {}),
+          };
+
+          // Upload to platform
+          const result = await adapter.upload(media.storageUrl, metadata, credentials);
+
+          if (result.success) {
+            await db.updateUploadQueueItem(input.id, {
+              status: "completed",
+              platformPostId: result.platformId,
+              platformUrl: result.platformUrl,
+              uploadedAt: new Date(),
+            });
+            return { success: true, platformUrl: result.platformUrl };
+          } else {
+            await db.updateUploadQueueItem(input.id, {
+              status: "failed",
+              errorMessage: result.error,
+            });
+            return { success: false, error: result.error };
+          }
+        } catch (error: any) {
+          await db.updateUploadQueueItem(input.id, {
+            status: "failed",
+            errorMessage: error.message,
+          });
+          return { success: false, error: error.message };
+        }
       }),
   }),
 
@@ -667,13 +756,9 @@ export const appRouter = router({
           throw new Error("Import job not found or unauthorized");
         }
         
-        // Update status to running
-        await db.updateImportJob(input.id, { status: "running", lastRunAt: new Date() });
-        
-        // TODO: Trigger background job processor
-        // This would be handled by a separate worker process
-        
-        return { success: true, message: "Import job started" };
+        // Start background processor
+        const result = await startImportJob(input.id, ctx.user.id);
+        return result;
       }),
   }),
 });
