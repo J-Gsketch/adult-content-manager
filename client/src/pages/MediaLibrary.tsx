@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import GooglePhotosPicker from "@/components/GooglePhotosPicker";
+import CameraCapture from "@/components/CameraCapture";
 
 export default function MediaLibrary() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -200,7 +201,11 @@ export default function MediaLibrary() {
               Upload and manage your content
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <CameraCapture onCapture={(file) => {
+              setSelectedFiles([file]);
+              toast.success('Photo captured from camera');
+            }} />
             <GooglePhotosPicker onPhotosSelected={(files) => {
               setSelectedFiles(files);
               toast.success(`Selected ${files.length} photo(s) from Google Photos`);

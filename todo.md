@@ -127,7 +127,15 @@
 - [x] Add touch-friendly controls and gestures
 - [x] Create mobile-optimized upload flow with Google Photos integration
 - [x] Add Google Photos picker component
-- [ ] Add camera capture functionality
-- [ ] Generate PWA icons (192x192 and 512x512)
+- [x] Add camera capture functionality
+- [x] Generate PWA icons (192x192 and 512x512)
+- [x] Create comprehensive Google OAuth setup guide
 - [ ] Test PWA installation on Android devices
-- [ ] Add environment variable VITE_GOOGLE_CLIENT_ID for Google Photos OAuth
+- [ ] Add environment variable VITE_GOOGLE_CLIENT_ID for Google Photos OAuth (see GOOGLE_OAUTH_SETUP.md)
+
+## New Tasks - Complete PWA Setup
+- [x] Set up Google OAuth credentials configuration
+- [x] Create documentation for obtaining Google Client ID
+- [x] Generate PWA icons (192x192 and 512x512)
+- [x] Add camera capture functionality
+- [x] Integrate camera with upload flow
