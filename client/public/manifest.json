@@ -1,7 +1,7 @@
 {
-  "name": "Adult Content Manager",
-  "short_name": "ACM",
-  "description": "Manage, organize, and monetize your adult content library",
+  "name": "ContentVault Hub",
+  "short_name": "CVH",
+  "description": "AI-powered content management and monetization platform for creators",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",

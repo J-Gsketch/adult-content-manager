@@ -148,3 +148,9 @@
 - [x] Add platform-specific metadata templates
 - [x] Build bulk export functionality
 - [x] Add platform credentials management UI
+
+## Bugs
+- [ ] Fix 404 error on published mobile URL
+
+## New Task
+- [x] Rename app to "ContentVault Hub"
