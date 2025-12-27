@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PlatformCredentials from "@/components/PlatformCredentials";
 
 export default function Settings() {
   const [galleryDialogOpen, setGalleryDialogOpen] = useState(false);
@@ -290,6 +291,7 @@ export default function Settings() {
                           >
                             {platform.status}
                           </span>
+                          <PlatformCredentials platformId={platform.id} platformName={platform.name} />
                           <Button
                             size="icon"
                             variant="ghost"

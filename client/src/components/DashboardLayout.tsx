@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Images, FolderTree, Tags, Upload, DollarSign, Settings, Download } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Images, FolderTree, Tags, Upload, DollarSign, Settings, Download, Package } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -34,6 +34,7 @@ const menuItems = [
   { icon: FolderTree, label: "Categories", path: "/categories" },
   { icon: Tags, label: "Tags", path: "/tags" },
   { icon: Upload, label: "Upload Queue", path: "/upload-queue" },
+  { icon: Package, label: "Upload Prep", path: "/upload-preparation" },
   { icon: DollarSign, label: "Revenue", path: "/revenue" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];

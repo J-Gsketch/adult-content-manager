@@ -13,6 +13,7 @@ import MediaLibrary from "./pages/MediaLibrary";
 import Settings from "./pages/Settings";
 import UploadQueue from "./pages/UploadQueue";
 import Revenue from "./pages/Revenue";
+import UploadPreparation from "./pages/UploadPreparation";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -25,6 +26,7 @@ function Router() {
       <Route path={"/media-library"} component={MediaLibrary} />
       <Route path={"/upload-queue"} component={UploadQueue} />
       <Route path={"/revenue"} component={Revenue} />
+      <Route path={"/upload-preparation"} component={UploadPreparation} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
