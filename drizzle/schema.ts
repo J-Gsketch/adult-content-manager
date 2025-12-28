@@ -269,3 +269,48 @@ export const revenue = mysqlTable("revenue", {
 export type Revenue = typeof revenue.$inferSelect;
 export type InsertRevenue = typeof revenue.$inferInsert;
 
+/**
+ * Notifications for users
+ */
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["content_approved", "content_uploaded", "revenue_milestone", "import_complete", "upload_failed", "system"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  actionUrl: varchar("actionUrl", { length: 512 }),
+  isRead: int("isRead").default(0).notNull(), // 0 = unread, 1 = read
+  metadata: text("metadata"), // JSON for additional data
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("userId_idx").on(table.userId),
+  isReadIdx: index("isRead_idx").on(table.isRead),
+  createdAtIdx: index("createdAt_idx").on(table.createdAt),
+}));
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
+
+/**
+ * User notification preferences
+ */
+export const notificationPreferences = mysqlTable("notification_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  pushEnabled: int("pushEnabled").default(1).notNull(),
+  emailEnabled: int("emailEnabled").default(1).notNull(),
+  contentApproved: int("contentApproved").default(1).notNull(),
+  contentUploaded: int("contentUploaded").default(1).notNull(),
+  revenueMilestone: int("revenueMilestone").default(1).notNull(),
+  importComplete: int("importComplete").default(1).notNull(),
+  uploadFailed: int("uploadFailed").default(1).notNull(),
+  pushSubscription: text("pushSubscription"), // JSON for web push subscription
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("userId_idx").on(table.userId),
+}));
+
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreference = typeof notificationPreferences.$inferInsert;
+

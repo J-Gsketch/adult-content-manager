@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
+import Notifications from "@/pages/Notifications";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
@@ -27,7 +28,7 @@ function Router() {
       <Route path={"/upload-queue"} component={UploadQueue} />
       <Route path={"/revenue"} component={Revenue} />
       <Route path={"/upload-preparation"} component={UploadPreparation} />
-      <Route path={"/settings"} component={Settings} />
+      <Route path={"/notifications"} component={Notifications} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
