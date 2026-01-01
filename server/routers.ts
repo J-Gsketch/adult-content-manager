@@ -10,11 +10,13 @@ import { analyzeAdultContent } from "./contentAnalyzer";
 import { startImportJob, stopImportJob } from "./importProcessor";
 import { getPlatformAdapter, listAvailablePlatforms } from "./platformAdapters";
 import { notificationsRouter } from "./routers/notificationsRouter";
+import { stripeRouter } from "./routers/stripeRouter";
 import crypto from "crypto";
 
 export const appRouter = router({
   system: systemRouter,
   notifications: notificationsRouter,
+  stripe: stripeRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

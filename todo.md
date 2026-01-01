@@ -167,3 +167,20 @@
 - [ ] Add email notification integration (requires SMTP setup)
 - [ ] Build notification permission request flow for PWA push
 - [ ] Generate VAPID keys for production push notifications
+
+## New Feature - Stripe Payment Integration
+- [x] Add Stripe SDK and environment configuration
+- [x] Create subscription plans (Basic $9.99, Pro $29.99, Premium $99.99)
+- [x] Build pricing page with plan comparison
+- [x] Implement checkout flow with Stripe Checkout
+- [x] Create customer portal for managing subscriptions
+- [x] Add webhook handlers for payment events
+- [x] Implement subscription status checks
+- [x] Create billing history page with invoice downloads
+- [x] Add database fields for Stripe customer and subscription tracking
+- [x] Build tRPC endpoints for Stripe operations
+- [x] Add Pricing and Billing menu items
+- [ ] Claim Stripe test sandbox at https://dashboard.stripe.com/claim_sandbox/YWNjdF8xU2pUZTRHVUhJWTdUUmNYLDE3Njc4Nzk3MzYv100IvEnTbEW
+- [ ] Configure Stripe webhook URL in dashboard
+- [ ] Test complete payment flow end-to-end
+- [ ] Add premium feature gates based on subscription tier
