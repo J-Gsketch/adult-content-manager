@@ -184,3 +184,20 @@
 - [ ] Configure Stripe webhook URL in dashboard
 - [ ] Test complete payment flow end-to-end
 - [ ] Add premium feature gates based on subscription tier
+
+## Full PWA Native Android Optimization
+- [x] Redesign mobile layout with bottom tab navigation (Android pattern)
+- [x] Remove sidebar on mobile, replace with bottom nav bar
+- [x] Add smooth page transition animations (fadeInUp)
+- [x] Create native-style loading skeletons
+- [x] Optimize touch targets (min 48dp)
+- [x] Add Android-style status bar color theming
+- [x] Add 4 app shortcuts in manifest
+- [x] Optimize Home dashboard for mobile viewport (2-column stat grid)
+- [x] Make upload flow mobile-first
+- [x] Add Inter font for native Android feel
+- [x] Hide scrollbars on mobile
+- [x] Prevent overscroll bounce
+- [x] Add safe area insets for notch/home indicator
+- [x] Add display_override for window-controls-overlay
+- [x] Write and pass 9 PWA unit tests

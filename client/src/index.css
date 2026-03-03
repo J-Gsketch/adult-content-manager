@@ -116,9 +116,23 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  html {
+    /* Prevent text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
   }
   body {
     @apply bg-background text-foreground;
+    /* Prevent overscroll bounce on iOS */
+    overscroll-behavior: none;
+    /* Better font rendering on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -169,4 +183,60 @@
       max-width: 1280px; /* Standard content width */
     }
   }
+}
+/* Safe area utilities for notch/home indicator on modern phones */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+/* Native-feeling scroll momentum */
+.scroll-smooth-native {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbars on mobile for cleaner look */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    scrollbar-width: none;
+  }
+}
+
+/* Smooth page transitions */
+@keyframes slideInFromRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.page-enter {
+  animation: fadeInUp 0.2s ease-out;
+}
+
+/* Bottom nav active indicator */
+.bottom-nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
 }

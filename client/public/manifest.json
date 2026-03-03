@@ -63,18 +63,36 @@
   },
   "shortcuts": [
     {
-      "name": "Upload Content",
-      "short_name": "Upload",
-      "description": "Upload new content",
+      "name": "Media Library",
+      "short_name": "Library",
+      "description": "Open your media library",
       "url": "/media-library",
-      "icons": [{ "src": "/icon-upload.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "View Library",
-      "short_name": "Library",
-      "description": "View media library",
-      "url": "/media-library",
-      "icons": [{ "src": "/icon-library.png", "sizes": "96x96" }]
+      "name": "Upload Queue",
+      "short_name": "Queue",
+      "description": "View upload queue",
+      "url": "/upload-queue",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Revenue",
+      "short_name": "Revenue",
+      "description": "Track your earnings",
+      "url": "/revenue",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Import Jobs",
+      "short_name": "Import",
+      "description": "Manage import jobs",
+      "url": "/import-jobs",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "scope": "/",
+  "lang": "en",
+  "prefer_related_applications": false
 }
