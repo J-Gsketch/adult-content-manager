@@ -31,11 +31,6 @@ const GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserI
 class OAuthService {
   constructor(private client: ReturnType<typeof axios.create>) {
     console.log("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
-    if (!ENV.oAuthServerUrl) {
-      console.error(
-        "[OAuth] ERROR: OAUTH_SERVER_URL is not configured! Set OAUTH_SERVER_URL environment variable."
-      );
-    }
   }
 
   private decodeState(state: string): string {
@@ -83,12 +78,29 @@ const createOAuthHttpClient = (): AxiosInstance =>
   });
 
 class SDKServer {
-  private readonly client: AxiosInstance;
-  private readonly oauthService: OAuthService;
+  private readonly oauthClient?: AxiosInstance;
+  private readonly oauthService?: OAuthService;
 
-  constructor(client: AxiosInstance = createOAuthHttpClient()) {
-    this.client = client;
-    this.oauthService = new OAuthService(this.client);
+  constructor() {
+    if (ENV.oAuthServerUrl) {
+      this.oauthClient = createOAuthHttpClient();
+      this.oauthService = new OAuthService(this.oauthClient);
+    } else {
+      console.log("[OAuth] Disabled (OAUTH_SERVER_URL is not configured)");
+    }
+  }
+
+  private isOAuthEnabled(): boolean {
+    return Boolean(ENV.oAuthServerUrl);
+  }
+
+  private assertOAuthEnabled(): asserts this is SDKServer & {
+    oauthClient: AxiosInstance;
+    oauthService: OAuthService;
+  } {
+    if (!this.isOAuthEnabled() || !this.oauthClient || !this.oauthService) {
+      throw new Error("OAuth is disabled (OAUTH_SERVER_URL is not configured)");
+    }
   }
 
   private deriveLoginMethod(
@@ -122,6 +134,7 @@ class SDKServer {
     code: string,
     state: string
   ): Promise<ExchangeTokenResponse> {
+    this.assertOAuthEnabled();
     return this.oauthService.getTokenByCode(code, state);
   }
 
@@ -131,6 +144,7 @@ class SDKServer {
    * const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
    */
   async getUserInfo(accessToken: string): Promise<GetUserInfoResponse> {
+    this.assertOAuthEnabled();
     const data = await this.oauthService.getUserInfoByToken({
       accessToken,
     } as ExchangeTokenResponse);
@@ -235,12 +249,13 @@ class SDKServer {
   async getUserInfoWithJwt(
     jwtToken: string
   ): Promise<GetUserInfoWithJwtResponse> {
+    this.assertOAuthEnabled();
     const payload: GetUserInfoWithJwtRequest = {
       jwtToken,
       projectId: ENV.appId,
     };
 
-    const { data } = await this.client.post<GetUserInfoWithJwtResponse>(
+    const { data } = await this.oauthClient.post<GetUserInfoWithJwtResponse>(
       GET_USER_INFO_WITH_JWT_PATH,
       payload
     );
@@ -272,6 +287,9 @@ class SDKServer {
 
     // If user not in DB, sync from OAuth server automatically
     if (!user) {
+      if (!this.isOAuthEnabled()) {
+        throw ForbiddenError("User not found");
+      }
       try {
         const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
         await db.upsertUser({

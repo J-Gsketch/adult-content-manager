@@ -8,7 +8,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>%VITE_APP_TITLE%</title>
+    <title>ContentVault Hub</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
@@ -33,10 +33,19 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script
-      defer
-      src="%VITE_ANALYTICS_ENDPOINT%/umami"
-      data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
+    <!-- Optional analytics (only loaded if env vars are provided) -->
+    <script type="module">
+      const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT;
+      const websiteId = import.meta.env.VITE_ANALYTICS_WEBSITE_ID;
+      if (endpoint && websiteId) {
+        const base = String(endpoint).replace(/\/$/, "");
+        const s = document.createElement("script");
+        s.defer = true;
+        s.src = `${base}/umami`;
+        s.setAttribute("data-website-id", websiteId);
+        document.head.appendChild(s);
+      }
+    </script>
   </body>
 
 </html>

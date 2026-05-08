@@ -5,18 +5,27 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
-import { getLoginUrl } from "./const";
+import { getLoginUrl, OAUTH_CONFIGURED } from "./const";
 import "./index.css";
-import { registerServiceWorker } from "./lib/registerSW";
+import {
+  registerServiceWorker,
+  unregisterServiceWorker,
+} from "./lib/registerSW";
 
 // Register service worker for PWA functionality
-registerServiceWorker();
+if (import.meta.env.DEV) {
+  // Avoid caching issues in dev (and ensures old SW doesn't serve stale assets).
+  unregisterServiceWorker();
+} else {
+  registerServiceWorker();
+}
 
 const queryClient = new QueryClient();
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
   if (typeof window === "undefined") return;
+  if (!OAUTH_CONFIGURED) return;
 
   const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
 
