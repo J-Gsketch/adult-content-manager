@@ -1,0 +1,9 @@
+image: gitpod/workspace-node:22
+
+tasks:
+  - init: corepack enable && pnpm install --frozen-lockfile
+    command: pnpm dev
+
+ports:
+  - port: 3000
+    onOpen: open-preview
