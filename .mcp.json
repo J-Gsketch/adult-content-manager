@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "insforge": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@insforge/mcp@latest"
+      ],
+      "env": {
+        "API_KEY": "ik_df44df5f86195f3feab0f27cc0a12bf3",
+        "API_BASE_URL": "https://53mapwmm.ap-southeast.insforge.app"
+      }
+    }
+  }
+}
