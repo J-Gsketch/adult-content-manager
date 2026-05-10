@@ -78,8 +78,11 @@ const createOAuthHttpClient = (): AxiosInstance =>
   });
 
 class SDKServer {
-  private readonly oauthClient?: AxiosInstance;
-  private readonly oauthService?: OAuthService;
+  // NOTE: These are intentionally not `private` because we use a TS assertion
+  // (`assertOAuthEnabled`) that narrows `this` to require these fields. With
+  // `private` fields, the intersection type can collapse to `never`.
+  readonly oauthClient?: AxiosInstance;
+  readonly oauthService?: OAuthService;
 
   constructor() {
     if (ENV.oAuthServerUrl) {
