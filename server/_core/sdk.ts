@@ -94,10 +94,7 @@ class SDKServer {
     return Boolean(ENV.oAuthServerUrl);
   }
 
-  private assertOAuthEnabled(): asserts this is SDKServer & {
-    oauthClient: AxiosInstance;
-    oauthService: OAuthService;
-  } {
+  private assertOAuthEnabled(): void {
     if (!this.isOAuthEnabled() || !this.oauthClient || !this.oauthService) {
       throw new Error("OAuth is disabled (OAUTH_SERVER_URL is not configured)");
     }
@@ -135,7 +132,7 @@ class SDKServer {
     state: string
   ): Promise<ExchangeTokenResponse> {
     this.assertOAuthEnabled();
-    return this.oauthService.getTokenByCode(code, state);
+    return this.oauthService!.getTokenByCode(code, state);
   }
 
   /**
@@ -145,7 +142,7 @@ class SDKServer {
    */
   async getUserInfo(accessToken: string): Promise<GetUserInfoResponse> {
     this.assertOAuthEnabled();
-    const data = await this.oauthService.getUserInfoByToken({
+    const data = await this.oauthService!.getUserInfoByToken({
       accessToken,
     } as ExchangeTokenResponse);
     const loginMethod = this.deriveLoginMethod(
@@ -255,7 +252,7 @@ class SDKServer {
       projectId: ENV.appId,
     };
 
-    const { data } = await this.oauthClient.post<GetUserInfoWithJwtResponse>(
+    const { data } = await this.oauthClient!.post<GetUserInfoWithJwtResponse>(
       GET_USER_INFO_WITH_JWT_PATH,
       payload
     );

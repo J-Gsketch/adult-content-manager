@@ -1,5 +1,6 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { User } from "../../drizzle/schema";
+import { tryGetDevBypassUser } from "./devAuthBypass";
 import { sdk } from "./sdk";
 
 export type TrpcContext = {
@@ -15,9 +16,8 @@ export async function createContext(
 
   try {
     user = await sdk.authenticateRequest(opts.req);
-  } catch (error) {
-    // Authentication is optional for public procedures.
-    user = null;
+  } catch {
+    user = await tryGetDevBypassUser(opts.req);
   }
 
   return {

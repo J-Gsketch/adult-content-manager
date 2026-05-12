@@ -1,3 +1,5 @@
+import { getCachedPublicConfig, getPublicConfig } from "./lib/publicConfig";
+
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
 export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "ContentVault Hub";
@@ -6,14 +8,11 @@ export const APP_LOGO =
   import.meta.env.VITE_APP_LOGO ||
   "https://placehold.co/128x128/E1E7EF/1F2937?text=App";
 
-export const OAUTH_CONFIGURED = Boolean(
-  import.meta.env.VITE_OAUTH_PORTAL_URL && import.meta.env.VITE_APP_ID
-);
-
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
-  const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
-  const appId = import.meta.env.VITE_APP_ID;
+  const cfg = getCachedPublicConfig();
+  const oauthPortalUrl = cfg?.oauth.portalUrl ?? null;
+  const appId = cfg?.oauth.appId ?? null;
 
   // If OAuth is not configured (e.g., local dev), return a safe fallback.
   // This prevents runtime crashes like "Failed to construct 'URL': Invalid URL".
@@ -32,3 +31,8 @@ export const getLoginUrl = () => {
 
   return url.toString();
 };
+
+export async function isOauthConfigured(): Promise<boolean> {
+  const cfg = await getPublicConfig();
+  return cfg.oauth.configured;
+}

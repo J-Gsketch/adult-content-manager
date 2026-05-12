@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
+import { getPublicConfig, type PublicConfig } from "@/lib/publicConfig";
 import {
   LayoutDashboard, LogOut, PanelLeft, Images, FolderTree, Tags,
   Upload, DollarSign, Settings, Download, Package, CreditCard, Receipt, Bell
@@ -60,13 +61,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { loading, user } = useAuth();
   const isMobile = useIsMobile();
 
+  const [publicConfig, setPublicConfig] = useState<PublicConfig | null>(null);
+  const [publicConfigLoaded, setPublicConfigLoaded] = useState(false);
+
+  useEffect(() => {
+    getPublicConfig()
+      .then(cfg => {
+        setPublicConfig(cfg);
+        setPublicConfigLoaded(true);
+      })
+      .catch(() => {
+        setPublicConfigLoaded(true);
+      });
+  }, []);
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
   }, [sidebarWidth]);
 
+
   if (loading) return <DashboardLayoutSkeleton />;
 
   if (!user) {
+    const oauthConfigured = Boolean(publicConfig?.oauth.configured);
+    const devBypassEnabled = Boolean(publicConfig?.devAuthBypass.enabled);
+
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
@@ -86,13 +104,49 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </p>
             </div>
           </div>
-          <Button
-            onClick={() => { window.location.href = getLoginUrl(); }}
-            size="lg"
-            className="w-full h-14 rounded-2xl text-base font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95"
-          >
-            Sign in with Google
-          </Button>
+          {publicConfigLoaded && oauthConfigured ? (
+            <Button
+              onClick={() => {
+                window.location.href = getLoginUrl();
+              }}
+              size="lg"
+              className="w-full h-14 rounded-2xl text-base font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95"
+            >
+              Sign in with Google
+            </Button>
+          ) : publicConfigLoaded && devBypassEnabled ? (
+            <Button
+              onClick={async () => {
+                await fetch("/api/dev/login", {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({}),
+                });
+                window.location.href = "/";
+              }}
+              size="lg"
+              className="w-full h-14 rounded-2xl text-base font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95"
+            >
+              Dev sign-in
+            </Button>
+          ) : publicConfigLoaded ? (
+            <Button
+              disabled
+              size="lg"
+              className="w-full h-14 rounded-2xl text-base font-semibold shadow-lg shadow-primary/10"
+            >
+              Sign-in not configured
+            </Button>
+          ) : (
+            <Button
+              disabled
+              size="lg"
+              className="w-full h-14 rounded-2xl text-base font-semibold shadow-lg shadow-primary/10"
+            >
+              Loading…
+            </Button>
+          )}
         </div>
       </div>
     );
